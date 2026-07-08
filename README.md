@@ -6,7 +6,7 @@
 
 - 位移比例：`auto`，按 BVH 骨架身高和 PMX 身高自动换算中心位移
 - 动作模式：`preserve`，保留 BVH 翻转时的躯干和腿部动作强度
-- 脚步：`auto`，走路使用 source foot IK，空翻自动关闭足 IK
+- 脚步：`auto`，默认保留 source foot IK；空翻时建议搭配 `follow-body` 让脚跟随身体旋转
 - 中心：保留位移，空翻时可自动写入 `センター` 旋转
 - 手部：`preserve` 模式不加人工偏移；`stable` 模式才使用外移/下压修正
 - 手腕强度：`0.45`
@@ -60,7 +60,7 @@ KimodoVMD转换器.cmd
 
 “脚 IK”选项：
 
-- `auto`：推荐。走路保留脚 IK，空翻关闭脚 IK，减少空中脚掌扭曲
+- `auto`：推荐。保留 Kimodo/BVH 的 source foot IK 轨迹
 - `source`：强制写入 Kimodo 脚部轨迹
 - `fk`：从当前 FK 姿态写脚 IK
 - `none`：不写脚 IK 轨道
@@ -68,7 +68,7 @@ KimodoVMD转换器.cmd
 “脚旋转”选项：
 
 - `none`：脚 IK 只写位置，不写旋转
-- `follow-body`：脚 IK 跟随身体/中心翻转旋转，适合空翻时脚掌一直保持世界方向造成扭曲的问题
+- `follow-body`：推荐。脚 IK 跟随身体/中心翻转旋转，适合空翻时保持脚掌相对身体方向
 
 “膝盖”选项：
 

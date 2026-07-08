@@ -1090,7 +1090,7 @@ def main():
     parser.add_argument(
         "--foot-rotation-mode",
         choices=("none", "follow-body"),
-        default="none",
+        default="follow-body",
         help="Rotate foot IK with inferred body rotation during flips so feet do not stay fixed in world space.",
     )
     parser.add_argument("--no-foot-ik-tracks", action="store_true")
@@ -1191,7 +1191,7 @@ def main():
         }
     effective_foot_ik_mode = args.foot_ik_mode
     if effective_foot_ik_mode == "auto":
-        effective_foot_ik_mode = "none" if body_rotation_enabled else "source"
+        effective_foot_ik_mode = "source"
     if body_rotation_enabled and args.motion_fidelity == "stable":
         for name, _pair in build_mappings():
             if name in {"下半身", "上半身", "上半身2", "首"}:

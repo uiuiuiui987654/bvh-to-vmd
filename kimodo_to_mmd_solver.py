@@ -641,6 +641,7 @@ def solve_frame_from_local_rotations(
         "上半身": "Spine1",
         "上半身2": "Chest",
         "首": "Neck2",
+        "頭": "Head",
         "右肩": "RightShoulder",
         "右腕": "RightArm",
         "右ひじ": "RightForeArm",
@@ -689,6 +690,7 @@ def solve_frame_from_global_rotations(
         "上半身": "Spine1",
         "上半身2": "Chest",
         "首": "Neck2",
+        "頭": "Head",
         "右肩": "RightShoulder",
         "右腕": "RightArm",
         "右ひじ": "RightForeArm",
@@ -816,10 +818,13 @@ def solve_frame(
         if name not in name_to_idx or src_a not in src_name_to_idx or src_b not in src_name_to_idx:
             return
         child_name = child_for_bone(name)
-        if child_name not in name_to_idx:
-            return
         idx = name_to_idx[name]
-        rest_dir = pmx_bones[name_to_idx[child_name]]["pos"] - pmx_bones[idx]["pos"]
+        if child_name in name_to_idx:
+            rest_dir = pmx_bones[name_to_idx[child_name]]["pos"] - pmx_bones[idx]["pos"]
+        elif name == "頭" and pmx_bones[idx]["parent"] >= 0:
+            rest_dir = pmx_bones[idx]["pos"] - pmx_bones[pmx_bones[idx]["parent"]]["pos"]
+        else:
+            return
         desired_dir = src[src_name_to_idx[src_b]] - src[src_name_to_idx[src_a]]
         target_global = rotation_between(rest_dir, desired_dir)
         q = mat_to_quat((np.eye(3) if pmx_bones[idx]["parent"] < 0 else global_rots[pmx_bones[idx]["parent"]]).T @ target_global)
@@ -1030,6 +1035,7 @@ def build_mappings():
         ("上半身", ("Spine1", "Chest")),
         ("上半身2", ("Chest", "Neck2")),
         ("首", ("Neck2", "Head")),
+        ("頭", ("Head", "HeadEnd")),
         ("右肩", ("RightShoulder", "RightArm")),
         ("右腕", ("RightArm", "RightForeArm")),
         ("右ひじ", ("RightForeArm", "RightHand")),
@@ -1295,7 +1301,7 @@ def main():
                         foot_rotations[ik_name][frame] = center_quat.copy()
                     else:
                         foot_rotations[ik_name][frame] = IDENTITY_QUAT.copy()
-        neutral_bones = ("頭",)
+        neutral_bones = ()
         if args.finger_mode == "neutral":
             neutral_bones = neutral_bones + FINGER_BONES
         for name in neutral_bones:

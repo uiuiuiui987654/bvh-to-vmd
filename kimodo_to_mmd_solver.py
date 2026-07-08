@@ -4,7 +4,10 @@ import os
 import struct
 from dataclasses import dataclass
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError as exc:
+    raise SystemExit("Missing dependency: numpy. Install it with: python -m pip install -r requirements.txt") from exc
 
 from render_mmd_pose import apply_pose, load_pmx_bones
 

@@ -13,5 +13,5 @@ if not "%~1"=="" set "BVH=%~1"
 if not "%~2"=="" set "PMX=%~2"
 if not "%~3"=="" set "OUT=%~3"
 
-"%PY%" "%~dp0kimodo_to_mmd_solver.py" --bvh "%BVH%" --pmx "%PMX%" --out "%OUT%" --foot-ik-mode auto --wrist-strength 0.45 --hand-outward 0.9 --hand-forward -0.25 --hand-down 2.0 --finger-mode omit --body-rotation-mode auto
+"%PY%" "%~dp0kimodo_to_mmd_solver.py" --bvh "%BVH%" --pmx "%PMX%" --out "%OUT%" --position-scale auto --motion-fidelity preserve --foot-ik-mode auto --foot-rotation-mode follow-body --wrist-strength 0.45 --finger-mode omit --body-rotation-mode auto --body-frame-mode full --body-rotation-transform normal --knee-hinge flip --leg-solver-mode ccd --pose-solver-mode position --local-rot-feet omit
 pause

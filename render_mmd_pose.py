@@ -3,8 +3,10 @@ import math
 import os
 import struct
 
-import numpy as np
-from PIL import Image, ImageDraw
+try:
+    import numpy as np
+except ImportError as exc:
+    raise SystemExit("Missing dependency: numpy. Install it with: python -m pip install -r requirements.txt") from exc
 
 
 def read_text(f, encoding):
@@ -175,6 +177,11 @@ def apply_pose(bones, frame):
 
 
 def draw_projection(bones, pts, out_path, axes=(0, 1)):
+    try:
+        from PIL import Image, ImageDraw
+    except ImportError as exc:
+        raise SystemExit("Missing optional dependency: Pillow. Install it with: python -m pip install pillow") from exc
+
     key_names = {
         "センター", "グルーブ", "腰", "下半身", "上半身", "上半身2", "首", "頭",
         "左肩", "左腕", "左ひじ", "左手首", "右肩", "右腕", "右ひじ", "右手首",

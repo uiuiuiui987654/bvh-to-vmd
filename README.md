@@ -15,6 +15,12 @@
 
 ## 图形界面
 
+第一次使用前安装依赖：
+
+```bat
+python -m pip install -r requirements.txt
+```
+
 双击：
 
 ```bat
@@ -105,6 +111,16 @@ KimodoVMD转换器.cmd
 ```bat
 convert_cli.cmd "input.bvh" "model.pmx" "output.vmd"
 ```
+
+`convert_cli.cmd` 默认使用和 GUI 一致的保真参数：
+
+- `--position-scale auto`
+- `--motion-fidelity preserve`
+- `--foot-ik-mode auto`
+- `--foot-rotation-mode follow-body`
+- `--body-rotation-mode auto`
+- `--knee-hinge flip`
+- `--pose-solver-mode position`
 
 ## 可选手指模式
 

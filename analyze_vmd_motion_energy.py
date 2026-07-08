@@ -4,7 +4,10 @@ import struct
 import sys
 from collections import defaultdict
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError as exc:
+    raise SystemExit("Missing dependency: numpy. Install it with: python -m pip install -r requirements.txt") from exc
 
 
 TRACKED_BONES = (

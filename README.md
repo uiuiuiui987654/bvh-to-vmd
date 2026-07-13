@@ -10,7 +10,7 @@
 - 中心：保留位移，空翻时可自动写入 `センター` 旋转
 - 手部：`preserve` 模式不加人工偏移；`stable` 模式才使用外移/下压修正
 - 手腕强度：`0.45`
-- 手指：Kimodo 没有可靠手指参数，默认不写入手指轨道
+- 手指：Kimodo BVH 没有可靠手指参数，默认不写入；FBX 会读取并转换 30 根手指骨
 - 空翻：自动检测身体翻转，并把翻转写入 `センター` 旋转
 
 ## 图形界面
@@ -100,13 +100,7 @@ KimodoVMD转换器.cmd
 
 ## 命令行
 
-直接双击 `convert_cli.cmd` 会使用默认测试文件：
-
-- `H:\3D\人物\output3.bvh`
-- `H:\3D\人物\鸣潮_千咲.pmx`
-- `H:\3D\人物\output3_kimodo_fixed.vmd`
-
-也可以传入自定义路径：
+`convert_cli.cmd` 需要依次传入 BVH、PMX 和输出 VMD 路径：
 
 ```bat
 convert_cli.cmd "input.bvh" "model.pmx" "output.vmd"
@@ -122,9 +116,31 @@ convert_cli.cmd "input.bvh" "model.pmx" "output.vmd"
 - `--knee-hinge flip`
 - `--pose-solver-mode position`
 
+## FBX 转 VMD
+
+FBX 转换需要 Blender。程序会先由 Blender 导出临时 BVH 和物体变换，再转换为 VMD：
+
+```bat
+convert_fbx_cli.cmd "input.fbx" "model.pmx" "output.vmd"
+```
+
+FBX 默认配置会：
+
+- 保留 FBX 的移动和整体转向
+- 按 Blender 世界坐标映射 VMD 中心位移，并保留首帧水平原点
+- 使用 FK 腿部和相对脚腕弯曲，关闭足 IK 与足尖 IK，避免脚掌被 IK 拉扭
+- 转换左右手共 30 根手指骨
+- 单独按掌面和拇指链方向解算拇指，避免套用普通手指骨轴
+
+可用 `--object-origin-mode delta` 忽略 FBX 首帧放置位置，或用 `horizontal` 保留水平位置。`absolute` 还会保留垂直位置，通常不建议与贴地修正同时使用。
+
 ## 可选手指模式
 
-默认不写手指轨道，这是推荐设置。
+直接转换 Kimodo BVH 时默认不写手指轨道，因为 Kimodo 没有可靠的手指参数。FBX 转换默认使用：
+
+```bat
+--finger-mode source --finger-strength 1.0 --finger-max-angle 90 --thumb-mode direction
+```
 
 如果需要强制写入静态默认手型，可以在命令行改用：
 

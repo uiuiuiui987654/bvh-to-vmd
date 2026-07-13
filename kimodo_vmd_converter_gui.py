@@ -9,11 +9,12 @@ from tkinter import filedialog, messagebox, ttk
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 SOLVER = os.path.join(APP_DIR, "kimodo_to_mmd_solver.py")
+FBX_TO_VMD = os.path.join(APP_DIR, "fbx_to_vmd.py")
 
 
-DEFAULT_BVH = r"H:\3D\人物\output3.bvh"
-DEFAULT_PMX = r"H:\3D\人物\鸣潮_千咲.pmx"
-DEFAULT_OUT = r"H:\3D\人物\output3_kimodo_fixed.vmd"
+DEFAULT_BVH = ""
+DEFAULT_PMX = ""
+DEFAULT_OUT = ""
 
 
 class ConverterApp(tk.Tk):
@@ -62,7 +63,7 @@ class ConverterApp(tk.Tk):
         root.columnconfigure(1, weight=1)
         root.rowconfigure(9, weight=1)
 
-        self._file_row(root, 0, "Kimodo BVH", self.bvh_var, self._pick_bvh)
+        self._file_row(root, 0, "输入 BVH/FBX", self.bvh_var, self._pick_bvh)
         self._file_row(root, 1, "目标 PMX", self.pmx_var, self._pick_pmx)
         self._file_row(root, 2, "输出 VMD", self.out_var, self._pick_out)
 
@@ -211,11 +212,15 @@ class ConverterApp(tk.Tk):
         ttk.Spinbox(frame, textvariable=var, from_=from_, to=to, increment=step, width=8).pack(fill="x")
 
     def _pick_bvh(self):
-        path = filedialog.askopenfilename(title="选择 Kimodo BVH", filetypes=[("BVH", "*.bvh"), ("所有文件", "*.*")])
+        path = filedialog.askopenfilename(
+            title="选择 BVH 或 FBX",
+            filetypes=[("BVH/FBX", "*.bvh *.fbx"), ("BVH", "*.bvh"), ("FBX", "*.fbx"), ("所有文件", "*.*")],
+        )
         if path:
             self.bvh_var.set(path)
             base = os.path.splitext(path)[0]
-            self.out_var.set(base + "_kimodo_fixed.vmd")
+            suffix = "_fbx_fixed.vmd" if path.lower().endswith(".fbx") else "_kimodo_fixed.vmd"
+            self.out_var.set(base + suffix)
 
     def _pick_pmx(self):
         path = filedialog.askopenfilename(title="选择 MMD PMX", filetypes=[("PMX", "*.pmx"), ("所有文件", "*.*")])
@@ -259,7 +264,7 @@ class ConverterApp(tk.Tk):
         pmx = self.pmx_var.get().strip()
         out = self.out_var.get().strip()
         if not os.path.isfile(bvh):
-            messagebox.showerror("文件不存在", "找不到 BVH 文件")
+            messagebox.showerror("文件不存在", "找不到 BVH/FBX 文件")
             return
         if not os.path.isfile(pmx):
             messagebox.showerror("文件不存在", "找不到 PMX 文件")
@@ -268,58 +273,72 @@ class ConverterApp(tk.Tk):
             messagebox.showerror("路径错误", "请设置输出 VMD 路径")
             return
 
-        args = [
-            sys.executable,
-            SOLVER,
-            "--bvh",
-            bvh,
-            "--pmx",
-            pmx,
-            "--out",
-            out,
-            "--position-scale",
-            self.position_scale_var.get().strip() or "auto",
-            "--foot-ik-mode",
-            self.foot_ik_mode_var.get(),
-            "--foot-rotation-mode",
-            self.foot_rotation_var.get(),
-            "--wrist-strength",
-            str(self.wrist_strength_var.get()),
-            "--hand-outward",
-            str(self.hand_outward_var.get()),
-            "--hand-forward",
-            str(self.hand_forward_var.get()),
-            "--hand-down",
-            str(self.hand_down_var.get()),
-            "--finger-mode",
-            self.finger_var.get(),
-            "--body-rotation-mode",
-            self.body_rotation_var.get(),
-            "--body-frame-mode",
-            self.body_frame_var.get(),
-            "--body-rotation-transform",
-            self.body_transform_var.get(),
-            "--motion-fidelity",
-            self.motion_fidelity_var.get(),
-            "--knee-hinge",
-            self.knee_hinge_var.get(),
-            "--leg-solver-mode",
-            self.leg_solver_var.get(),
-            "--leg-max-angle",
-            str(self.leg_max_angle_var.get()),
-            "--pose-solver-mode",
-            self.pose_solver_var.get(),
-            "--local-rot-feet",
-            self.local_rot_feet_var.get(),
-            "--ground-fit-mode",
-            self.ground_fit_var.get(),
-            "--ground-fit-start",
-            str(self.ground_fit_start_var.get()),
-            "--ground-fit-end",
-            str(self.ground_fit_end_var.get()),
-            "--ground-fit-strength",
-            str(self.ground_fit_strength_var.get()),
-        ]
+        is_fbx = bvh.lower().endswith(".fbx")
+        if is_fbx:
+            args = [
+                sys.executable,
+                FBX_TO_VMD,
+                "--fbx",
+                bvh,
+                "--pmx",
+                pmx,
+                "--out",
+                out,
+            ]
+        else:
+            ground_fit_mode = self.ground_fit_var.get()
+            args = [
+                sys.executable,
+                SOLVER,
+                "--bvh",
+                bvh,
+                "--pmx",
+                pmx,
+                "--out",
+                out,
+                "--position-scale",
+                self.position_scale_var.get().strip() or "auto",
+                "--foot-ik-mode",
+                self.foot_ik_mode_var.get(),
+                "--foot-rotation-mode",
+                self.foot_rotation_var.get(),
+                "--wrist-strength",
+                str(self.wrist_strength_var.get()),
+                "--hand-outward",
+                str(self.hand_outward_var.get()),
+                "--hand-forward",
+                str(self.hand_forward_var.get()),
+                "--hand-down",
+                str(self.hand_down_var.get()),
+                "--finger-mode",
+                self.finger_var.get(),
+                "--body-rotation-mode",
+                self.body_rotation_var.get(),
+                "--body-frame-mode",
+                self.body_frame_var.get(),
+                "--body-rotation-transform",
+                self.body_transform_var.get(),
+                "--motion-fidelity",
+                self.motion_fidelity_var.get(),
+                "--knee-hinge",
+                self.knee_hinge_var.get(),
+                "--leg-solver-mode",
+                self.leg_solver_var.get(),
+                "--leg-max-angle",
+                str(self.leg_max_angle_var.get()),
+                "--pose-solver-mode",
+                self.pose_solver_var.get(),
+                "--local-rot-feet",
+                self.local_rot_feet_var.get(),
+                "--ground-fit-mode",
+                ground_fit_mode,
+                "--ground-fit-start",
+                str(self.ground_fit_start_var.get()),
+                "--ground-fit-end",
+                str(self.ground_fit_end_var.get()),
+                "--ground-fit-strength",
+                str(self.ground_fit_strength_var.get()),
+            ]
         if self.foot_ik_display_var.get():
             args.append("--enable-foot-ik")
 
